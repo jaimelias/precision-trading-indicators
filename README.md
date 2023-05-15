@@ -45,6 +45,7 @@ const indicators = new PrecisionTradingIndicators.default(BigNumber);
 ### Node
 
 ```javascript
+import BigNumber from 'bignumber.js';
 import PrecisionTradingIndicators from 'precision-trading-indicators';
 const indicators = new PrecisionTradingIndicators(BigNumber);
 ```
