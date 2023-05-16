@@ -11,9 +11,7 @@ const {
     MFI, 
     RSI, 
     STOCHASTIC_RSI, 
-    bollingerBandsLocation, 
     getTrend,
-    findLastCross
 } = indicators;
 
 const period = 14;
@@ -134,19 +132,33 @@ const ohlcv = data.reduce(
 
 const {close} = ohlcv;
 
-const rsi = RSI(close, period);
-const closePrice = close[close.length - 1];
+const rsi = RSI(close, period); //outputs and array
+
+//STOCHASTIC_RSI
+//outputs an object with 4 array elements {K <array>, D <array>, crossInterval <number>, crossType <string: 'death' || 'golden'>}
+//STOCHASTIC_RSI_VALUES are in D.
+//crossInterval indicates in which intervar K and D lines crossed. 0 for the current interval, 1 for the previous interval...
+//crossInterval indicates the current trend after the last cross.
+const stochasticRsi = STOCHASTIC_RSI(rsi, period, 3, 3);
+
+
+//MACD
+//outputs an object with 5 array elements  {diff <array>, dea <array>, histogram <array>, crossInterval <number>, crossType <string: 'death' || 'golden'>}
+//crossInterval indicates in which intervar diff and dea lines crossed. 0 for the current interval, 1 for the previous interval...
+//crossInterval indicates the current trend after the last cross..
 const macd = MACD(close, 12, 26, 9);
-const macdCross = findLastCross({fast: macd.diff, slow: macd.dea});
+
+//BOLLINGER_BANDS
+//outputs an object with 4 array elements {upper <array>, lower <array>, mid <array>, loc <number>}
+//loc is a percentage numeric representation of the current price in bollinger bands.
 const bollingerBands = BOLLINGER_BANDS(close, 20, 2);
-const {mid, upper, lower} = bollingerBands;
-const trend = getTrend(mid, period);
-const bollLocation = bollingerBandsLocation(closePrice, {upper, lower, mid});
-const {D, K} = STOCHASTIC_RSI(rsi, period, 3, 3); //stochasticRsi = D
-const stochasticRsiCross = findLastCross({fast: K, slow: D});
-const adx = ADX(ohlcv, period);
-const mfi = MFI(ohlcv, period);
-const ema = EMA(close, period);
-const ma = MA(close, period);
+const {mid} = bollingerBands;
+
+const trend = getTrend(mid, period); //ouputs a <string: 'upward' || 'downward'> indicating the direction of the trend
+
+const adx = ADX(ohlcv, period); //outputs and array
+const mfi = MFI(ohlcv, period); //outputs and array
+const ema = EMA(close, period); //outputs and array
+const ma = MA(close, period); //outputs and array
 	
-console.log({ema, ma, rsi, macd, macdCross, trend, bollingerBands, bollLocation, stochasticRsiCross, adx, mfi});
+console.log({ema, ma, rsi, stochasticRsi, macd, trend, bollingerBands, adx, mfi});

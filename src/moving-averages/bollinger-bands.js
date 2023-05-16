@@ -1,5 +1,6 @@
 import { MA } from './ma.js';
 import { arrayMath } from '../utilities/array-math.js';
+import { bollingerBandsLocation } from '../trend-reversal/bollinger-bands-location.js';
 
 export const BOLLINGER_BANDS = (BigNumber, data, size = 20, times = 2) => {
 
@@ -14,8 +15,12 @@ export const BOLLINGER_BANDS = (BigNumber, data, size = 20, times = 2) => {
   let mid = avg;
 
   let lower = arrayMath(avg, timesSd, 'sub', BigNumber);
+  
+  const lastValue = data[data.length - 1];
 
-  return {upper, mid, lower};
+  const loc = bollingerBandsLocation(lastValue, {upper, mid, lower});
+
+  return {upper, mid, lower, loc};
 }
 
 
