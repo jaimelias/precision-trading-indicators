@@ -8,10 +8,10 @@ export const findLastCross = ({fast, slow}) => {
 
   while (i >= 0 && crossType === null) {
     if (fast[i].isLessThan(slow[i]) && i > 0 && fast[i - 1].isGreaterThanOrEqualTo(slow[i - 1])) {
-      crossType = 'death';
+      crossType = 'down';
       lastCrossIndex = i;
     } else if (fast[i].isGreaterThan(slow[i]) && i > 0 && fast[i - 1].isLessThanOrEqualTo(slow[i - 1])) {
-      crossType = 'golden';
+      crossType = 'up';
       lastCrossIndex = i;
     }
     i--;

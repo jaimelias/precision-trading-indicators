@@ -1,4 +1,4 @@
-export const getTrend = (BigNumber, data, period) => {
+export const getTrend = (BigNumber, data, period = 24) => {
     const n = data.length;
     const startIndex = Math.max(0, n - period);
     const endIndex = n - 1;
@@ -24,11 +24,11 @@ export const getTrend = (BigNumber, data, period) => {
       ).dividedBy(priceDiffs.length - 1).sqrt();
   
     if (priceDiffAvg.isGreaterThan(zero) && priceDiffStdDev.isGreaterThan(threshold.times(priceDiffAvg))) {
-      direction = 'upward';
+      direction = 'up';
     } else if (priceDiffAvg.isLessThan(zero) && priceDiffStdDev.isGreaterThan(threshold.times(priceDiffAvg.abs()))) {
-      direction = 'downward';
+      direction = 'down';
     } else {
-      direction = 'sideward';
+      direction = 'neutral';
     }
   
     return direction;

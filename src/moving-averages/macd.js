@@ -1,6 +1,6 @@
 import { EMA } from './ema.js';
 import { arrayMath } from '../utilities/array-math.js';
-import { findLastCross } from '../trend-reversal/find-last-cross.js';
+import { findLastCross } from '../signals/find-last-cross.js';
 
 
 export const MACD = (BigNumber, data, fastLine = 12, slowLine = 26, signalLine = 9) => {

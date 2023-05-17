@@ -1,5 +1,5 @@
 
-export const RSI = (BigNumber, data, period) => {
+export const RSI = (BigNumber, data, period = 14) => {
     if(data.length < period) {
       return [];
     }

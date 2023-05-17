@@ -1,6 +1,6 @@
 import { MA } from './ma.js';
 import { arrayMath } from '../utilities/array-math.js';
-import { bollingerBandsLocation } from '../trend-reversal/bollinger-bands-location.js';
+import { bollingerBandsLocation } from '../signals/bollinger-bands-location.js';
 
 export const BOLLINGER_BANDS = (BigNumber, data, size = 20, times = 2) => {
 

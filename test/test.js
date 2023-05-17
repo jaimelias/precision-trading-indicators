@@ -12,6 +12,7 @@ const {
     RSI, 
     STOCHASTIC_RSI, 
     getTrend,
+	getMomentum
 } = indicators;
 
 const period = 14;
@@ -154,11 +155,13 @@ const macd = MACD(close, 12, 26, 9);
 const bollingerBands = BOLLINGER_BANDS(close, 20, 2);
 const {mid} = bollingerBands;
 
-const trend = getTrend(mid, period); //ouputs a <string: 'upward' || 'downward'> indicating the direction of the trend
 
 const adx = ADX(ohlcv, period); //outputs and array
 const mfi = MFI(ohlcv, period); //outputs and array
-const ema = EMA(close, period); //outputs and array
+const ema20 = EMA(close, 20); //outputs and array
+const ema40 = EMA(close, 40); //outputs and array
+const momentum = getMomentum({data: close, fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
+const trend = getTrend(mid, period); //ouputs a <string: 'up' || 'down' || 'neutral'> indicating the direction of the trend
 const ma = MA(close, period); //outputs and array
 	
-console.log({ema, ma, rsi, stochasticRsi, macd, trend, bollingerBands, adx, mfi});
+console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi});

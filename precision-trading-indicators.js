@@ -7,9 +7,10 @@ import {ADX} from './src/oscillators/adx.js';
 import {MFI} from './src/oscillators/mfi.js';
 import {RSI} from './src/oscillators/rsi.js';
 import {STOCHASTIC_RSI} from './src/oscillators/stochastic-rsi.js';
-import {bollingerBandsLocation} from './src/trend-reversal/bollinger-bands-location.js';
-import {getTrend} from './src/trend-reversal/get-trend.js';
-import {findLastCross} from './src/trend-reversal/find-last-cross.js';
+import {bollingerBandsLocation} from './src/signals/bollinger-bands-location.js';
+import {getTrend} from './src/signals/get-trend.js';
+import {findLastCross} from './src/signals/find-last-cross.js';
+import {getMomentum} from './src/signals/get-momentum.js';
 
 export default class PrecisionTradingIndicators {
     constructor(BigNumber)
@@ -33,6 +34,7 @@ export default class PrecisionTradingIndicators {
         this.bollingerBandsLocation = this.bollingerBandsLocation.bind(this);
         this.getTrend = this.getTrend.bind(this);
         this.findLastCross = this.findLastCross.bind(this);
+        this.getMomentum = this.getMomentum.bind(this);
     }
     EMA(data, size)
     {
@@ -42,9 +44,9 @@ export default class PrecisionTradingIndicators {
     {
         return MA(this.BigNumber, data, size);
     }
-    MACD(data, fastLine = 12, slowLine = 26, signalLine = 9)
+    MACD(data, fastLine, slowLine, signalLine)
     {
-        return MACD(this.BigNumber, data, fastLine = 12, slowLine = 26, signalLine = 9);
+        return MACD(this.BigNumber, data, fastLine, slowLine, signalLine);
     }
     BOLLINGER_BANDS(data, size, times)
     {
@@ -77,5 +79,9 @@ export default class PrecisionTradingIndicators {
     findLastCross({fast, slow})
     {
         return findLastCross({fast, slow});
+    }
+    getMomentum({data, fast, slow, threshold})
+    {
+        return getMomentum({data, fast, slow, threshold});
     }
 }

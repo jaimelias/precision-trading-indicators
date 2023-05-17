@@ -1,8 +1,8 @@
 import { EMA } from '../moving-averages/ema.js';
-import { findLastCross } from '../trend-reversal/find-last-cross.js';
+import { findLastCross } from '../signals/find-last-cross.js';
 
 
-export const STOCHASTIC_RSI = (BigNumber, rsi, kPeriods, kSlowingPeriods, dPeriods) => {
+export const STOCHASTIC_RSI = (BigNumber, rsi, kPeriods = 14, kSlowingPeriods = 3, dPeriods = 3) => {
 	
     if(rsi.length < kPeriods)
     {
@@ -25,7 +25,7 @@ export const STOCHASTIC_RSI = (BigNumber, rsi, kPeriods, kSlowingPeriods, dPerio
     
     const D = EMA(BigNumber, K, dPeriods);
     
-    const {crossType, crossInterval} = findLastCross({fast: K, slow: D});
+    const {crossType, crossInterval} = findLastCross({fast: D, slow: K});
 
     //stochasticRsi = D
 
