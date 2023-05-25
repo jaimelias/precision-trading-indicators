@@ -11,6 +11,7 @@ import {bollingerBandsLocation} from './src/signals/bollinger-bands-location.js'
 import {getTrend} from './src/signals/get-trend.js';
 import {findLastCross} from './src/signals/find-last-cross.js';
 import {getMomentum} from './src/signals/get-momentum.js';
+import {getCandlestickPattern} from './src/signals/candlestick-pattern.js';
 
 export default class PrecisionTradingIndicators {
     constructor(BigNumber)
@@ -83,5 +84,9 @@ export default class PrecisionTradingIndicators {
     getMomentum({data, fast, slow, threshold})
     {
         return getMomentum({data, fast, slow, threshold});
+    }
+    getCandlestickPattern(ohlcv)
+    {
+        return getCandlestickPattern(ohlcv);
     }
 }

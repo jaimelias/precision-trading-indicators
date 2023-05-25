@@ -12,7 +12,8 @@ const {
     RSI, 
     STOCHASTIC_RSI, 
     getTrend,
-	getMomentum
+	getMomentum,
+	getCandlestickPattern
 } = indicators;
 
 const period = 14;
@@ -163,5 +164,7 @@ const ema40 = EMA(close, 40); //outputs and array
 const momentum = getMomentum({data: close, fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
 const trend = getTrend(mid, period); //ouputs a <string: 'up' || 'down' || 'neutral'> indicating the direction of the trend
 const ma = MA(close, period); //outputs and array
-	
-console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi});
+const candlestickPattern = getCandlestickPattern(ohlcv);
+console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi, candlestickPattern});
+
+console.log(candlestickPattern);
