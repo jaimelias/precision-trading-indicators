@@ -10,11 +10,11 @@ export const getMomentum = ({data, fast, slow, threshold = 0.02 }) => {
     const fastSlowDividedByFast = fastSlowDiff.dividedBy(fastValue);
 
     if (dataDividedByFast.isGreaterThan(threshold) && fastSlowDividedByFast.isGreaterThan(threshold)) {
-      return 'strong up';
+      return 2; //strong up
     }
     else 
     {
-      return 'up';
+      return 1; //up
     }
 
   }
@@ -25,15 +25,15 @@ export const getMomentum = ({data, fast, slow, threshold = 0.02 }) => {
 
     if (absDataDividedByFast.isGreaterThan(threshold) && absFastSlowDividedByFast.isGreaterThan(threshold))
     {
-      return 'strong down';
+      return -2; //strong down
     }
     else
     {
-      return 'down';
+      return -1; //down
     }
   }
   else 
   {
-    return 'neutral';
+    return 0;
   }
 };
