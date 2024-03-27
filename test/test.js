@@ -167,4 +167,4 @@ const ma = MA(close, period); //outputs and array
 const candlestickPattern = getCandlestickPattern(ohlcv);
 //console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi, candlestickPattern});
 
-console.log(momentum)
+console.log(candlestickPattern)
