@@ -1,6 +1,13 @@
 
 export const findLastCross = ({fast, slow}) => {
-  const size = fast.length;
+  let size = Math.min(fast.length, slow.length)
+
+  while (fast.length > size) {
+    fast.shift()
+  }
+  while (slow.length > size) {
+    slow.shift()
+  }
   
   let crossType = null;
   let lastCrossIndex = null;
