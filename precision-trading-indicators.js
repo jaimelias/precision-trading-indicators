@@ -57,7 +57,7 @@ export default class PrecisionTradingIndicators {
     }
     ICHIMOKU_CLOUD(ohlcv)
     {
-        return ICHIMOKU_CLOUD(this.BigNumber, ohlcv);
+        return ICHIMOKU_CLOUD(ohlcv);
     }
     ADX(ohlcv, period)
     {

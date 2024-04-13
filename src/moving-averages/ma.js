@@ -1,7 +1,6 @@
 export const MA = (BigNumber, data, size) => {
-  const length = data.length;
-
-  const newData = data.map(v => BigNumber(v));
+  const length = data.length
+  const newData = data
 
   if (!size) {
     const sum = newData.reduce((a, b) => a.plus(b));

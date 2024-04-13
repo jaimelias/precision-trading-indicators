@@ -1,68 +1,75 @@
-import { findLastCross } from "../signals/find-last-cross"
+export function ICHIMOKU_CLOUD(ohlcv) {
 
-export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
-    const {high, low, close} = ohlcv
-    const conversionPeriods = 9
-    const basePeriods = 26
-    const spanBPeriods = 52
-    const displacement = 26
-    const len = close.length
+    let {high, low, close} = ohlcv
+    high = high.map(v => v.toNumber())
+    low = low.map(v => v.toNumber())
+    close = close.map(v => v.toNumber())
 
-    let conversionLine = new Array(len)
-    let baseLine = new Array(len)
-    let leadingSpanA = new Array(len + displacement)
-    let leadingSpanB = new Array(len + displacement)
-    let laggingSpan = new Array(len)
+    const TENKAN_SEN_PERIOD = 9;
+    const KIJUN_SEN_PERIOD = 26;
+    const SENKOU_SPAN_B_PERIOD = 52;
+    const SENKOU_SPAN_A_PERIOD = (TENKAN_SEN_PERIOD + KIJUN_SEN_PERIOD) / 2;
 
-    for (let i = 0; i < len; i++) {
-        if (i >= conversionPeriods - 1) {
-            const { highest: highConversion, lowest: lowConversion } = calculateHighLow(BigNumber, high, i - conversionPeriods + 1, i + 1)
-            conversionLine[i] = highConversion.plus(lowConversion).dividedBy(2)
-        }
+    let tenkanSen = calculateAverage(high, low, TENKAN_SEN_PERIOD);
+    let kijunSen = calculateAverage(high, low, KIJUN_SEN_PERIOD);
+    let senkouSpanA = calculateSenkouSpanA(tenkanSen, kijunSen, SENKOU_SPAN_A_PERIOD);
+    let senkouSpanB = calculateSenkouSpanB(high, low, SENKOU_SPAN_B_PERIOD);
+    let chikouSpan = calculateChikouSpan(close, KIJUN_SEN_PERIOD); // Corrected chikouSpan calculation
 
-        if (i >= basePeriods - 1) {
-            const { highest: highBase, lowest: lowBase } = calculateHighLow(BigNumber, low, i - basePeriods + 1, i + 1)
-            baseLine[i] = highBase.plus(lowBase).dividedBy(2)
-        }
-
-        if (i >= spanBPeriods - 1) {
-            const { highest: highSpanB, lowest: lowSpanB } = calculateHighLow(BigNumber, low, i - spanBPeriods + 1, i + 1)
-            leadingSpanB[i + displacement] = highSpanB.plus(lowSpanB).dividedBy(2)
-        }
-
-        if (conversionLine[i] && baseLine[i]) {
-            leadingSpanA[i + displacement] = conversionLine[i].plus(baseLine[i]).dividedBy(2)
-        }
-
-        if (i >= displacement) {
-            laggingSpan[i - displacement] = BigNumber(close[i])
-        }
-    }
-
-    const {crossInterval, crossType} = findLastCross({fast: conversionLine, slow: baseLine})
+    let startIndex = KIJUN_SEN_PERIOD;
+    tenkanSen = tenkanSen.slice(startIndex);
+    kijunSen = kijunSen.slice(startIndex);
+    senkouSpanA = senkouSpanA.slice(startIndex);
+    chikouSpan = chikouSpan.slice(0, -KIJUN_SEN_PERIOD);
+    senkouSpanB = senkouSpanB.slice(startIndex);
 
     return {
-        conversionLine,
-        baseLine,
-        leadingSpanA,
-        leadingSpanB,
-        laggingSpan,
-        crossInterval, 
-        crossType
-    }
+        conversionLine: tenkanSen,
+        baseLine: kijunSen,
+        leadingSpanA: senkouSpanA,
+        leadingSpanB: senkouSpanB,
+        laggingSpan: chikouSpan
+    };
 }
 
-const calculateHighLow = (BigNumber, data, from, to) => {
-    let highest = BigNumber(data[from])
-    let lowest = BigNumber(data[from])
-    for (let i = from + 1; i < to; i++) {
-        let current = BigNumber(data[i])
-        if (current.isGreaterThan(highest)) {
-            highest = current
+function calculateAverage(high, low, period) {
+    let averages = [];
+    for (let i = period - 1; i < high.length; i++) {
+        let sum = 0;
+        for (let j = i; j > i - period; j--) {
+            sum += (high[j] + low[j]) / 2;
         }
-        if (current.isLessThan(lowest)) {
-            lowest = current
+        averages.push(sum / period);
+    }
+    return averages;
+}
+
+function calculateSenkouSpanA(tenkanSen, kijunSen, period) {
+    let senkouSpanA = [];
+    for (let i = 0; i < tenkanSen.length; i++) {
+        if (i >= period - 1) {
+            let sum = 0;
+            for (let j = i; j > i - period; j--) {
+                sum += (tenkanSen[j] + kijunSen[j]) / 2;
+            }
+            senkouSpanA.push(sum / period);
+        } else {
+            senkouSpanA.push(null); // Not enough data for calculation
         }
     }
-    return { highest, lowest }
+    return senkouSpanA;
+}
+
+function calculateSenkouSpanB(high, low, period) {
+    let senkouSpanB = [];
+    for (let i = period - 1; i < high.length; i++) {
+        let maxHigh = Math.max(...high.slice(i - period + 1, i + 1));
+        let minLow = Math.min(...low.slice(i - period + 1, i + 1));
+        senkouSpanB.push((maxHigh + minLow) / 2);
+    }
+    return senkouSpanB;
+}
+
+function calculateChikouSpan(close, kijunSenPeriod) {
+    return close.slice(kijunSenPeriod); // Just slice the close prices
 }
