@@ -22,7 +22,7 @@ export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
     senkouSpanB = senkouSpanB.slice(startIndex)
     const {crossInterval, crossType} = findLastCross({fast: tenkanSen, slow: kijunSen})
 
-    const minArr = [tenkanSen, kijunSen, senkouSpanA, senkouSpanB, chikouSpan];
+    const minArr = [tenkanSen, kijunSen]
     let size = Math.min(...minArr.map(arr => arr.length))
 
     minArr.forEach(arr => {
