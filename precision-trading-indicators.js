@@ -12,6 +12,7 @@ import {getTrend} from './src/signals/get-trend.js';
 import {findLastCross} from './src/signals/find-last-cross.js';
 import {getMomentum} from './src/signals/get-momentum.js';
 import {getCandlestickPattern} from './src/signals/candlestick-pattern.js';
+import { ICHIMOKU_CLOUD } from './src/moving-averages/Ichimoku-cloud.js';
 
 export default class PrecisionTradingIndicators {
     constructor(BigNumber)
@@ -24,6 +25,7 @@ export default class PrecisionTradingIndicators {
         this.MA = this.MA.bind(this);
         this.MACD = this.MACD.bind(this);
         this.BOLLINGER_BANDS = this.BOLLINGER_BANDS.bind(this);
+        this.ICHIMOKU_CLOUD = this.ICHIMOKU_CLOUD.bind(this);
 
         //oscillators
         this.ADX = this.ADX.bind(this);
@@ -52,6 +54,10 @@ export default class PrecisionTradingIndicators {
     BOLLINGER_BANDS(data, size, times)
     {
         return BOLLINGER_BANDS(this.BigNumber, data, size, times);
+    }
+    ICHIMOKU_CLOUD(ohlcv)
+    {
+        return ICHIMOKU_CLOUD(this.BigNumber, ohlcv);
     }
     ADX(ohlcv, period)
     {

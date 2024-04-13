@@ -6,7 +6,8 @@ const {
 	EMA, 
     MA, 
     MACD, 
-    BOLLINGER_BANDS, 
+    BOLLINGER_BANDS,
+	ICHIMOKU_CLOUD,
     ADX, 
     MFI, 
     RSI, 
@@ -167,4 +168,6 @@ const ma = MA(close, period); //outputs and array
 const candlestickPattern = getCandlestickPattern(ohlcv);
 //console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi, candlestickPattern});
 
-console.log(candlestickPattern)
+const ichi = ICHIMOKU_CLOUD(ohlcv)
+
+console.log(JSON.stringify(ichi))
