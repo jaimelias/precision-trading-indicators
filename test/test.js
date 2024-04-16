@@ -123,6 +123,8 @@ let data = [
 ]
 
 
+data = [...data, ...data]
+
 const ohlcv = data.reduce(
 	(acc, [timestamp, open, high, low, close, volume]) => ({
 	  timestamp: [...acc.open, timestamp],
