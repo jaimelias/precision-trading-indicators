@@ -1,4 +1,5 @@
-import { findLastCross } from "../signals/find-last-cross.js"
+
+import { findLastCross } from "../signals/find-last-cross.js" 
 
 export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
 
@@ -20,16 +21,8 @@ export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
     senkouSpanA = senkouSpanA.slice(startIndex)
     chikouSpan = chikouSpan.slice(0, -KIJUN_SEN_PERIOD)
     senkouSpanB = senkouSpanB.slice(startIndex)
+
     const {crossInterval, crossType} = findLastCross({fast: tenkanSen, slow: kijunSen})
-
-    const minArr = [tenkanSen, kijunSen]
-    let size = Math.min(...minArr.map(arr => arr.length))
-
-    minArr.forEach(arr => {
-        while (arr.length > size) {
-            arr.shift()
-        }
-    })
 
     return {
         conversionLine: tenkanSen,
@@ -46,9 +39,10 @@ const calculateAverage =  (BigNumber, high, low, period) => {
     let averages = []
 
     for (let i = period - 1; i < high.length; i++) {
-        let sum = BigNumber(0)
+        let sum = new BigNumber(0)
         for (let j = i; j > i - period; j--) {
-            sum = (high[j].plus(low[j])).dividedBy(2)
+            const calc = (high[j].plus(low[j])).dividedBy(2)
+            sum = sum.plus(calc)
         }
         averages.push(sum.dividedBy(period))
     }
@@ -62,9 +56,10 @@ const calculateSenkouSpanA = (BigNumber, tenkanSen, kijunSen, period) => {
 
     for (let i = 0; i < tenkanSen.length; i++) {
         if (i >= period - 1) {
-            let sum = BigNumber(0)
+            let sum = new BigNumber(0)
             for (let j = i; j > i - period; j--) {
-                sum = (tenkanSen[j].plus(kijunSen[j])).dividedBy(2)
+                const calc = (tenkanSen[j].plus(kijunSen[j])).dividedBy(2)
+                sum = sum.plus(calc)
             }
             senkouSpanA.push(sum.dividedBy(period))
         } else {
@@ -80,8 +75,8 @@ const calculateSenkouSpanB = (BigNumber, high, low, period) => {
     let senkouSpanB = []
 
     for (let i = period - 1; i < high.length; i++) {
-        let maxHigh = BigNumber.maximum(...high.slice(i - period + 1, i + 1))
-        let minLow = BigNumber.minimum(...low.slice(i - period + 1, i + 1))
+        let maxHigh = new BigNumber.maximum(...high.slice(i - period + 1, i + 1))
+        let minLow = new BigNumber.minimum(...low.slice(i - period + 1, i + 1))
         senkouSpanB.push((maxHigh.plus(minLow)).dividedBy(2))
     }
 
