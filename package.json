@@ -1,6 +1,6 @@
 {
   "name": "precision-trading-indicators",
-  "version": "1.1.5",
+  "version": "1.1.7",
   "description": "High precision trading indicators: RSI, Bollinger Bands, MACD, EMA, MA, many moving averages and oscillators. Trend and reversal detection patterns available.",
   "main": "precision-trading-indicators.js",
   "type": "module",

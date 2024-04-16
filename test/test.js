@@ -14,7 +14,8 @@ const {
     STOCHASTIC_RSI, 
     getTrend,
 	getMomentum,
-	getCandlestickPattern
+	getCandlestickPattern,
+	fibonacciLevels
 } = indicators;
 
 const period = 14;
@@ -175,3 +176,7 @@ const candlestickPattern = getCandlestickPattern(ohlcv);
 const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 //console.log(JSON.stringify(ichi))
+
+const fibonacci = fibonacciLevels(ohlcv, 5)
+
+console.log(fibonacci)
