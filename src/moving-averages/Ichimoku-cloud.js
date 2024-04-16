@@ -24,17 +24,6 @@ export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
 
     const {crossInterval, crossType} = findLastCross({fast: tenkanSen, slow: kijunSen})
 
-    
-    const arr = senkouSpanB.map((o, i) => {
-
-        return [i, o, senkouSpanA[i]]
-
-    })
-
-    console.log(senkouSpanB.length)
-    console.log(senkouSpanA.length)
-
-
     return {
         conversionLine: tenkanSen,
         baseLine: kijunSen,
