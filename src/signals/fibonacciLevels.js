@@ -14,8 +14,8 @@ export const fibonacciLevels = (BigNumber, ohlcv, period = 14) => {
     const lowestLow = BigNumber.minimum(...low)
 
     const fibLevels = {}
-    levels.forEach(level => {
-        fibLevels[level] = fibonacciRetracementLevel(lowestLow, highestHigh, level)
+    levels.forEach((level, index) => {
+        fibLevels[`fb${index+1}`] = fibonacciRetracementLevel(lowestLow, highestHigh, level)
     })
 
     return fibLevels

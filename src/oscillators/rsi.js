@@ -1,10 +1,12 @@
 
-export const RSI = (BigNumber, data, period = 14) => {
+import { EMA } from "../moving-averages/ema.js";
+
+export const RSI = (BigNumber, data, period = 14, emaPeriod = 9) => {
     if(data.length < period) {
       return [];
     }
   
-    let arr = [];
+    let rsi = [];
     let pl = data.slice(0, period);  
     const zero = BigNumber(0);
     const hundred = BigNumber(100);
@@ -27,14 +29,17 @@ export const RSI = (BigNumber, data, period = 14) => {
       const gainperiod = gain.dividedBy(period);
       const lossperiod = loss.dividedBy(period);
   
-      const rs = lossperiod.isEqualTo(zero) ? zero : gainperiod.dividedBy(lossperiod);
-      const rsi = hundred.minus(hundred.dividedBy(one.plus(rs)));
+      const gainLoss = lossperiod.isEqualTo(zero) ? zero : gainperiod.dividedBy(lossperiod);
   
-      arr.push(rsi);
+      rsi.push(
+        hundred.minus(hundred.dividedBy(one.plus(gainLoss)))
+      )
   
       pl.splice(0, 1);
     }
+
+    const rsiEma = EMA(BigNumber, rsi, emaPeriod)
   
-    return arr;
+    return {rsi, rsiEma};
   }
   

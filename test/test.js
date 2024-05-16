@@ -167,7 +167,7 @@ const {adx, diMinus, diPlus} = ADX(ohlcv, period); //outputs and array
 const mfi = MFI(ohlcv, period); //outputs and array
 const ema20 = EMA(close, 20); //outputs and array
 const ema40 = EMA(close, 40); //outputs and array
-const momentum = getMomentum({fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
+const momentum = getMomentum({close, fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
 const trend = getTrend(mid, period); //ouputs a <string: 'up' || 'down' || 'neutral'> indicating the direction of the trend
 const ma = MA(close, period); //outputs and array
 const candlestickPattern = getCandlestickPattern(ohlcv);
@@ -179,4 +179,4 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 const fibonacci = fibonacciLevels(ohlcv, 5)
 
-console.log(fibonacci)
+console.log(rsi)

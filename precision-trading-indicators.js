@@ -69,9 +69,9 @@ export default class PrecisionTradingIndicators {
     {
         return MFI(this.BigNumber, ohlcv, period)
     }
-    RSI(data, period)
+    RSI(data, period, emaPeriod)
     {
-        return RSI(this.BigNumber, data, period)
+        return RSI(this.BigNumber, data, period, emaPeriod)
     }
     STOCHASTIC_RSI(rsi, kPeriods, kSlowingPeriods, dPeriods)
     {
@@ -89,9 +89,9 @@ export default class PrecisionTradingIndicators {
     {
         return findLastCross({fast, slow})
     }
-    getMomentum({data, fast, slow, threshold})
+    getMomentum({data, close, fast, slow})
     {
-        return getMomentum({data, fast, slow, threshold})
+        return getMomentum({BigNumber: this.BigNumber, data, close, fast, slow})
     }
     getCandlestickPattern(ohlcv)
     {
