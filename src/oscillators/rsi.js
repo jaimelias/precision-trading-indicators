@@ -1,5 +1,6 @@
 
 import { EMA } from "../moving-averages/ema.js";
+import { findLastCross } from "../signals/find-last-cross.js";
 
 export const RSI = (BigNumber, data, period = 14, emaPeriod = 9) => {
     if(data.length < period) {
@@ -39,7 +40,9 @@ export const RSI = (BigNumber, data, period = 14, emaPeriod = 9) => {
     }
 
     const rsiEma = EMA(BigNumber, rsi, emaPeriod)
+
+    const {crossType, crossInterval} = findLastCross({fast: rsi, slow: rsiEma});
   
-    return {rsi, rsiEma};
+    return {rsi, rsiEma, crossType, crossInterval};
   }
   
