@@ -2,7 +2,7 @@
 import { EMA } from "../moving-averages/ema.js";
 import { findLastCross } from "../signals/find-last-cross.js";
 
-export const RSI = (BigNumber, data, period = 14, emaPeriod = 9) => {
+export const RSI = (BigNumber, data, period = 14, emaPeriod = 14) => {
     if(data.length < period) {
       return [];
     }
