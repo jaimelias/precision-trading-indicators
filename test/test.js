@@ -169,7 +169,7 @@ const ema20 = EMA(close, 20); //outputs and array
 const ema40 = EMA(close, 40); //outputs and array
 const momentum = getMomentum({close, fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
 const trend = getTrend(mid, period); //ouputs a <string: 'up' || 'down' || 'neutral'> indicating the direction of the trend
-const ma = MA(close, period); //outputs and array
+const ma = MA([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 200); //outputs and array
 const candlestickPattern = getCandlestickPattern(ohlcv);
 //console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi, candlestickPattern});
 
@@ -179,4 +179,4 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 const fibonacci = fibonacciLevels(ohlcv, 5)
 
-console.log(rsi)
+console.log(ma)

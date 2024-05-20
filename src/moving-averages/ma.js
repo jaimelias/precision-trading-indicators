@@ -1,42 +1,25 @@
 export const MA = (BigNumber, data, size) => {
-  const length = data.length
-  const newData = data
-
-  if (!size) {
-    const sum = newData.reduce((a, b) => a.plus(b));
-    return sum.dividedBy(length);
-  }
-
-  if (size <= 1) {
-    return newData.slice();
-  }
-
-  if (size > length) {
-    return Array(length);
-  }
-
-  const ret = [];
+  
+  let result = [];
   let sum = BigNumber(0);
+  let arr = [];
 
-  for (let i = 0; i < length; i++) {
-    const thisVal = newData[i];
+  for (let i = 0; i < data.length; i++) {
 
-    if (typeof thisVal === 'object') {
-      sum = sum.plus(thisVal);
-    }
+      arr.push(data[i])
+      sum = sum.plus(data[i])
 
-    if (i >= size) {
-      const prevVal = newData[i - size];
-
-      if (typeof prevVal === 'object') {
-        sum = sum.minus(prevVal);
+      if (arr.length > size) {
+          sum = sum.minus(arr.shift())
       }
-    }
 
-    if (i >= size - 1) {
-      ret[i] = sum.dividedBy(size);
-    }
+      if (i >= size - 1) {
+          result.push(sum.dividedBy(size));
+      } else {
+
+        result.push(sum.dividedBy(arr.length));
+      }
   }
 
-  return ret;
+  return result;
 }
