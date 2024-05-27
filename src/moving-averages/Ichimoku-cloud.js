@@ -15,14 +15,16 @@ export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
     let senkouSpanB = calculateSenkouSpanB(BigNumber, high, low, SENKOU_SPAN_B_PERIOD)
     let chikouSpan = calculateChikouSpan(close, KIJUN_SEN_PERIOD)
 
-
-    let startIndex = KIJUN_SEN_PERIOD
+    const startIndex = KIJUN_SEN_PERIOD
     tenkanSen = tenkanSen.slice(startIndex)
     kijunSen = kijunSen.slice(startIndex)
     senkouSpanA = senkouSpanA.slice(startIndex).filter(o => o && !isNaN(o))
     chikouSpan = chikouSpan.slice(0, -KIJUN_SEN_PERIOD)
 
-    const {crossInterval, crossType} = findLastCross({fast: tenkanSen, slow: kijunSen})
+    const newClose = close.splice(-senkouSpanA.length)
+    const spanACross = findLastCross({fast: newClose, slow: senkouSpanA})
+    const spanBCross = findLastCross({fast: newClose, slow: senkouSpanB})
+    const baseCross = findLastCross({fast: tenkanSen, slow: kijunSen})
 
     return {
         conversionLine: tenkanSen,
@@ -30,8 +32,11 @@ export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
         leadingSpanA: senkouSpanA,
         leadingSpanB: senkouSpanB,
         laggingSpan: chikouSpan,
-        crossInterval,
-        crossType
+        crosses: {
+            spanACross,
+            spanBCross,
+            baseCross
+        }
     }
 }
 

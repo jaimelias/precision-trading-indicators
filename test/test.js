@@ -179,4 +179,4 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 const fibonacci = fibonacciLevels(ohlcv, 5)
 
-console.log(ma)
+console.log(ichi)
