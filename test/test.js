@@ -16,6 +16,7 @@ const {
 	getMomentum,
 	getCandlestickPattern,
 	fibonacciLevels,
+	findLastCross,
 	linearRegression
 } = indicators;
 
@@ -180,6 +181,27 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 const fibonacci = fibonacciLevels(ohlcv, 5)
 
-const linearPrediction = linearRegression(close, 4)
+const computeMomentum = ({ close, params, predict }) => {
+    const { fastValue, slowValue } = params
+    const fast = MA(close, fastValue)
+    const slow = MA(close, slowValue)
+    const momentum = getMomentum({close, fast, slow }).toNumber()
+    const { crossInterval, crossType } = findLastCross({ fast, slow })
 
-console.log(linearPrediction)
+    const linearPredictionFast = linearRegression(fast, predict)
+    const linearPredictionSlow = linearRegression(slow, predict)
+    const crossPrediction = findLastCross({fast: [...fast, ...linearPredictionFast], slow: [...slow, ...linearPredictionSlow]})
+	const nextCrossType = 'neutral'
+	const nextCrossInterval = -1
+
+	if(crossPrediction.crossInterval <= 4)
+	{
+		nextCrossType = crossPrediction.crossType
+		nextCrossInterval = predict - crossPrediction.crossInterval
+	}
+
+    return { momentum, crossInterval, crossType, nextCrossInterval, nextCrossType }
+}
+
+const params = {fastValue: 9, slowValue: 21}
+console.log(computeMomentum({close, params, predict: 5}))
