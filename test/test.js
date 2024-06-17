@@ -15,7 +15,8 @@ const {
     getTrend,
 	getMomentum,
 	getCandlestickPattern,
-	fibonacciLevels
+	fibonacciLevels,
+	linearRegression
 } = indicators;
 
 const period = 14;
@@ -179,4 +180,6 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 const fibonacci = fibonacciLevels(ohlcv, 5)
 
-console.log(ichi)
+const linearPrediction = linearRegression(close, 4)
+
+console.log(linearPrediction)

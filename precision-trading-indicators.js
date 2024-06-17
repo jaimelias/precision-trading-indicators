@@ -14,6 +14,7 @@ import {getMomentum} from './src/signals/get-momentum.js'
 import {getCandlestickPattern} from './src/signals/candlestick-pattern.js'
 import { ICHIMOKU_CLOUD } from './src/moving-averages/Ichimoku-cloud.js'
 import { fibonacciLevels } from './src/signals/fibonacciLevels.js'
+import { linearRegression } from './src/regressors/linearRegressor.js'
 
 export default class PrecisionTradingIndicators {
     constructor(BigNumber)
@@ -40,6 +41,9 @@ export default class PrecisionTradingIndicators {
         this.findLastCross = this.findLastCross.bind(this)
         this.getMomentum = this.getMomentum.bind(this)
         this.fibonacciLevels = this.fibonacciLevels.bind(this)
+
+        //regressors
+        this.linearRegression = this.linearRegression.bind(this)
     }
     EMA(data, size)
     {
@@ -100,5 +104,9 @@ export default class PrecisionTradingIndicators {
     fibonacciLevels(ohlc, period)
     {
         return fibonacciLevels(this.BigNumber, ohlc, period)
+    }
+    linearRegression(data, prediction)
+    {
+        return linearRegression(this.BigNumber, data, prediction)
     }
 }
