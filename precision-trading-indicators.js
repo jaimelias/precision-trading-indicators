@@ -8,12 +8,10 @@ import {MFI} from './src/oscillators/mfi.js'
 import {RSI} from './src/oscillators/rsi.js'
 import {STOCHASTIC_RSI} from './src/oscillators/stochastic-rsi.js'
 import {bollingerBandsLocation} from './src/signals/bollinger-bands-location.js'
-import {getTrend} from './src/signals/get-trend.js'
 import {findLastCross} from './src/signals/find-last-cross.js'
 import {getMomentum} from './src/signals/get-momentum.js'
 import {getCandlestickPattern} from './src/signals/candlestick-pattern.js'
 import { ICHIMOKU_CLOUD } from './src/moving-averages/Ichimoku-cloud.js'
-import { fibonacciLevels } from './src/signals/fibonacciLevels.js'
 import { linearRegression } from './src/regressors/linearRegressor.js'
 
 export default class PrecisionTradingIndicators {
@@ -37,25 +35,23 @@ export default class PrecisionTradingIndicators {
 
         //trend and reversals
         this.bollingerBandsLocation = this.bollingerBandsLocation.bind(this)
-        this.getTrend = this.getTrend.bind(this)
         this.findLastCross = this.findLastCross.bind(this)
         this.getMomentum = this.getMomentum.bind(this)
-        this.fibonacciLevels = this.fibonacciLevels.bind(this)
 
         //regressors
         this.linearRegression = this.linearRegression.bind(this)
     }
     EMA(data, size)
     {
-        return EMA(this.BigNumber, data, size)
+        return new EMA(this.BigNumber, data, size)
     }
     MA(data, size)
     {
-        return MA(this.BigNumber, data, size)
+        return new MA(this.BigNumber, data, size)
     }
     MACD(data, fastLine, slowLine, signalLine)
     {
-        return MACD(this.BigNumber, data, fastLine, slowLine, signalLine)
+        return new MACD(this.BigNumber, data, fastLine, slowLine, signalLine)
     }
     BOLLINGER_BANDS(data, size, times)
     {
@@ -71,11 +67,11 @@ export default class PrecisionTradingIndicators {
     }
     MFI(ohlcv, period)
     {
-        return MFI(this.BigNumber, ohlcv, period)
+        return new MFI(this.BigNumber, ohlcv, period)
     }
     RSI(data, period, emaPeriod)
     {
-        return RSI(this.BigNumber, data, period, emaPeriod)
+        return new RSI(this.BigNumber, data, period, emaPeriod)
     }
     STOCHASTIC_RSI(rsi, kPeriods, kSlowingPeriods, dPeriods)
     {
@@ -84,10 +80,6 @@ export default class PrecisionTradingIndicators {
     bollingerBandsLocation(value, bollingerBands)
     {
         return bollingerBandsLocation(value, bollingerBands)
-    }
-    getTrend(data, period)
-    {
-        return getTrend(this.BigNumber, data, period)
     }
     findLastCross({fast, slow})
     {
@@ -100,10 +92,6 @@ export default class PrecisionTradingIndicators {
     getCandlestickPattern(ohlcv)
     {
         return getCandlestickPattern(ohlcv)
-    }
-    fibonacciLevels(ohlc, period)
-    {
-        return fibonacciLevels(this.BigNumber, ohlc, period)
     }
     linearRegression(data, prediction)
     {

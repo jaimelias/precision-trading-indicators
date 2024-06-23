@@ -1,47 +1,71 @@
-export const EMA = (BigNumber, data, size) => {
-  const alpha = BigNumber(2 / (size + 1));
-  const length = data.length;
-  const ret = [];
+export class EMA {
+  constructor(BigNumber, data, size) {
+    this.BigNumber = BigNumber;
+    this.size = size;
+    this.alpha = BigNumber(2 / (size + 1));
+    this.data = data;
+    this.result = [];
+    this.s = null;
 
-  if (alpha.isGreaterThan(1)) {
-    return Array(length);
-  }
-
-  if (alpha.isEqualTo(1)) {
-    return [...data];
-  }
-
-  let s = 0;
-
-  // Handles head
-  let i = 0;
-  for (; i < length; i++) {
-    const datum = data[i];
-    if (typeof datum === 'object') {
-      ret[i] = datum;
-      s = datum;
-      i++;
-      break;
+    if (this.alpha.isGreaterThan(1)) {
+      this.result = Array(data.length).fill(null);
+    } else if (this.alpha.isEqualTo(1)) {
+      this.result = [...data];
+    } else {
+      this.calculateInitialEMA();
     }
   }
 
-  if (Array.isArray(alpha)) {
+  calculateInitialEMA() {
+    const length = this.data.length;
+    let i = 0;
+
+    // Initialize the first value of EMA
+    while (i < length) {
+      const datum = this.data[i];
+      if (typeof datum === 'object') {
+        this.result[i] = datum;
+        this.s = datum;
+        i++;
+        break;
+      }
+      i++;
+    }
+
+    // Calculate EMA for the rest of the data
+    const o = this.BigNumber(1).minus(this.alpha);
     for (; i < length; i++) {
-      const datum = data[i];
-      if (typeof datum === 'object' && typeof alpha[i] === 'object') {
-        s = ret[i] = alpha[i].multipliedBy(datum).plus(alpha[i].minus(1).multipliedBy(s));
+      const datum = this.data[i];
+      this.s = typeof datum === 'object' ? this.alpha.multipliedBy(datum).plus(o.multipliedBy(this.s)) : this.result[i - 1];
+      this.result[i] = this.s;
+    }
+  }
+
+  add(dataPoint) {
+    if (this.result.length === 0) {
+      this.s = dataPoint;
+      this.result.push(dataPoint);
+    } else {
+      const o = this.BigNumber(1).minus(this.alpha);
+      this.s = this.alpha.multipliedBy(dataPoint).plus(o.multipliedBy(this.s));
+      this.result.push(this.s);
+    }
+  }
+
+  update(dataPoint) {
+    if (this.result.length > 0) {
+      const o = this.BigNumber(1).minus(this.alpha);
+      if (this.result.length === 1) {
+        this.s = dataPoint;
+        this.result[0] = dataPoint;
       } else {
-        ret[i] = ret[i - 1];
+        this.s = this.alpha.multipliedBy(dataPoint).plus(o.multipliedBy(this.result[this.result.length - 2]));
+        this.result[this.result.length - 1] = this.s;
       }
     }
-  } else {
-    const o = BigNumber(1).minus(alpha);
-    for (; i < length; i++) {
-      const datum = data[i];
-      s = typeof datum === 'object' ? alpha.multipliedBy(datum).plus(o.multipliedBy(s)) : ret[i - 1];
-      ret[i] = s;
-    }
   }
 
-  return ret;
-};
+  get() {
+    return this.result;
+  }
+}

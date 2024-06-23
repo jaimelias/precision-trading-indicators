@@ -12,10 +12,8 @@ const {
     MFI, 
     RSI, 
     STOCHASTIC_RSI, 
-    getTrend,
 	getMomentum,
 	getCandlestickPattern,
-	fibonacciLevels,
 	findLastCross,
 	linearRegression
 } = indicators;
@@ -142,7 +140,7 @@ const ohlcv = data.reduce(
 
 const {close} = ohlcv;
 
-const rsi = RSI(close, period); //outputs and array
+const rsi = RSI(close, period).get(); //outputs and array
 
 //STOCHASTIC_RSI
 //outputs an object with 4 array elements {K <array>, D <array>, crossInterval <number>, crossType <string: 'death' || 'golden'>}
@@ -156,7 +154,8 @@ const stochasticRsi = STOCHASTIC_RSI(rsi, period, 3, 3);
 //outputs an object with 5 array elements  {diff <array>, dea <array>, histogram <array>, crossInterval <number>, crossType <string: 'death' || 'golden'>}
 //crossInterval indicates in which intervar diff and dea lines crossed. 0 for the current interval, 1 for the previous interval...
 //crossInterval indicates the current trend after the last cross..
-const macd = MACD(close, 12, 26, 9);
+const macd = MACD(close, 12, 26, 9).get();
+const {diff} = macd
 
 //BOLLINGER_BANDS
 //outputs an object with 4 array elements {upper <array>, lower <array>, mid <array>, loc <number>}
@@ -166,12 +165,11 @@ const {mid} = bollingerBands;
 
 
 const {adx, diMinus, diPlus} = ADX(ohlcv, period); //outputs and array
-const mfi = MFI(ohlcv, period); //outputs and array
-const ema20 = EMA(close, 20); //outputs and array
-const ema40 = EMA(close, 40); //outputs and array
+const mfi = MFI(ohlcv, period).get(); //outputs and array
+const ema20 = EMA(close, 20).get(); //outputs and array
+const ema40 = EMA(close, 40).get(); //outputs and array
 const momentum = getMomentum({close, fast: ema20, slow: ema40}); //ouputs a <string: 'up' ||  'strong up' || 'down' || 'strong down' || 'neutral'>
-const trend = getTrend(mid, period); //ouputs a <string: 'up' || 'down' || 'neutral'> indicating the direction of the trend
-const ma = MA([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 200); //outputs and array
+const ma = MA([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 200).get(); //outputs and array
 const candlestickPattern = getCandlestickPattern(ohlcv);
 //console.log({ema20, ema40, ma, rsi, stochasticRsi, macd, trend, momentum, bollingerBands, adx, mfi, candlestickPattern});
 
@@ -179,29 +177,4 @@ const ichi = ICHIMOKU_CLOUD(ohlcv)
 
 //console.log(JSON.stringify(ichi))
 
-const fibonacci = fibonacciLevels(ohlcv, 5)
-
-const computeMomentum = ({ close, params, predict }) => {
-    const { fastValue, slowValue } = params
-    const fast = MA(close, fastValue)
-    const slow = MA(close, slowValue)
-    const momentum = getMomentum({close, fast, slow }).toNumber()
-    const { crossInterval, crossType } = findLastCross({ fast, slow })
-
-    const linearPredictionFast = linearRegression(fast, predict)
-    const linearPredictionSlow = linearRegression(slow, predict)
-    const crossPrediction = findLastCross({fast: [...fast, ...linearPredictionFast], slow: [...slow, ...linearPredictionSlow]})
-	const nextCrossType = 'neutral'
-	const nextCrossInterval = -1
-
-	if(crossPrediction.crossInterval <= 4)
-	{
-		nextCrossType = crossPrediction.crossType
-		nextCrossInterval = predict - crossPrediction.crossInterval
-	}
-
-    return { momentum, crossInterval, crossType, nextCrossInterval, nextCrossType }
-}
-
-const params = {fastValue: 9, slowValue: 21}
-console.log(computeMomentum({close, params, predict: 5}))
+console.log(mfi[mfi.length -1])

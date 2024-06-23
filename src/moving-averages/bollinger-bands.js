@@ -5,7 +5,7 @@ import { bollingerBandsLocation } from '../signals/bollinger-bands-location.js';
 export const BOLLINGER_BANDS = (BigNumber, data, size = 20, times = 2) => {
 
   times = BigNumber(times);
-  const avg = MA(BigNumber, data, size);
+  const avg = new MA(BigNumber, data, size).get();
   const sd = deviation(BigNumber, data, size);
 
   const timesSd = arrayMath(sd, times, 'mul', BigNumber)
@@ -28,7 +28,7 @@ const deviation =  (BigNumber, data, size) => {
   
   const zero = BigNumber(0);
   const length = data.length;
-  const avg = MA(BigNumber, data, size);
+  const avg = new MA(BigNumber, data, size).get();
   const ret = [];
 
   let i = size - 1

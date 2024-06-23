@@ -21,9 +21,8 @@ export const STOCHASTIC_RSI = (BigNumber, rsi, kPeriods = 14, kSlowingPeriods = 
       kValues.push(kValue);
     }
     
-    const K = EMA(BigNumber, kValues, kSlowingPeriods);
-    
-    const D = EMA(BigNumber, K, dPeriods);
+    const K = new EMA(BigNumber, kValues, kSlowingPeriods).get();
+    const D = new EMA(BigNumber, K, dPeriods).get();
     
     const {crossType, crossInterval} = findLastCross({fast: D, slow: K});
 
