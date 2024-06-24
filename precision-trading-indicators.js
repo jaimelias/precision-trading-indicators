@@ -2,7 +2,7 @@
 import {EMA} from './src/moving-averages/ema.js'
 import {MA} from './src/moving-averages/ma.js'
 import {MACD} from './src/moving-averages/macd.js'
-import {BOLLINGER_BANDS} from './src/moving-averages/bollinger-bands.js'
+import {BollingerBands} from './src/moving-averages/bollinger-bands.js'
 import {ADX} from './src/oscillators/adx.js'
 import {MFI} from './src/oscillators/mfi.js'
 import {RSI} from './src/oscillators/rsi.js'
@@ -10,9 +10,8 @@ import {STOCHASTIC_RSI} from './src/oscillators/stochastic-rsi.js'
 import {bollingerBandsLocation} from './src/signals/bollinger-bands-location.js'
 import {findLastCross} from './src/signals/find-last-cross.js'
 import {getMomentum} from './src/signals/get-momentum.js'
-import {getCandlestickPattern} from './src/signals/candlestick-pattern.js'
-import { ICHIMOKU_CLOUD } from './src/moving-averages/Ichimoku-cloud.js'
-import { linearRegression } from './src/regressors/linearRegressor.js'
+import {getCandlestickPattern} from './src/patterns/candlestick-pattern.js'
+import { IchimokuCloud } from './src/moving-averages/Ichimoku-cloud.js'
 
 export default class PrecisionTradingIndicators {
     constructor(BigNumber)
@@ -24,8 +23,8 @@ export default class PrecisionTradingIndicators {
         this.EMA = this.EMA.bind(this)
         this.MA = this.MA.bind(this)
         this.MACD = this.MACD.bind(this)
-        this.BOLLINGER_BANDS = this.BOLLINGER_BANDS.bind(this)
-        this.ICHIMOKU_CLOUD = this.ICHIMOKU_CLOUD.bind(this)
+        this.BollingerBands = this.BollingerBands.bind(this)
+        this.IchimokuCloud = this.IchimokuCloud.bind(this)
 
         //oscillators
         this.ADX = this.ADX.bind(this)
@@ -38,8 +37,8 @@ export default class PrecisionTradingIndicators {
         this.findLastCross = this.findLastCross.bind(this)
         this.getMomentum = this.getMomentum.bind(this)
 
-        //regressors
-        this.linearRegression = this.linearRegression.bind(this)
+        //patterns
+        //this.getCandlestickPattern = this.getCandlestickPattern(this)
     }
     EMA(data, size)
     {
@@ -53,17 +52,17 @@ export default class PrecisionTradingIndicators {
     {
         return new MACD(this.BigNumber, data, fastLine, slowLine, signalLine)
     }
-    BOLLINGER_BANDS(data, size, times)
+    BollingerBands(data, size, times)
     {
-        return BOLLINGER_BANDS(this.BigNumber, data, size, times)
+        return new BollingerBands(this.BigNumber, data, size, times)
     }
-    ICHIMOKU_CLOUD(ohlcv)
+    IchimokuCloud(ohlcv)
     {
-        return ICHIMOKU_CLOUD(this.BigNumber, ohlcv)
+        return new IchimokuCloud(this.BigNumber, ohlcv)
     }
     ADX(ohlcv, period)
     {
-        return ADX(this.BigNumber, ohlcv, period)
+        return new ADX(this.BigNumber, ohlcv, period)
     }
     MFI(ohlcv, period)
     {
@@ -75,11 +74,11 @@ export default class PrecisionTradingIndicators {
     }
     STOCHASTIC_RSI(rsi, kPeriods, kSlowingPeriods, dPeriods)
     {
-        return STOCHASTIC_RSI(this.BigNumber, rsi, kPeriods, kSlowingPeriods, dPeriods)
+        return new STOCHASTIC_RSI(this.BigNumber, rsi, kPeriods, kSlowingPeriods, dPeriods)
     }
     bollingerBandsLocation(value, bollingerBands)
     {
-        return bollingerBandsLocation(value, bollingerBands)
+        return  bollingerBandsLocation(value, bollingerBands)
     }
     findLastCross({fast, slow})
     {
@@ -91,10 +90,6 @@ export default class PrecisionTradingIndicators {
     }
     getCandlestickPattern(ohlcv)
     {
-        return getCandlestickPattern(ohlcv)
-    }
-    linearRegression(data, prediction)
-    {
-        return linearRegression(this.BigNumber, data, prediction)
+        return new getCandlestickPattern(ohlcv)
     }
 }

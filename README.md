@@ -58,7 +58,7 @@ const {
 	EMA, 
     MA, 
     MACD, 
-    BOLLINGER_BANDS, 
+    BollingerBands, 
     ADX, 
     MFI, 
     RSI, 
@@ -201,10 +201,10 @@ const stochasticRsi = STOCHASTIC_RSI(rsi, period, 3, 3);
 //crossInterval indicates the current trend after the last cross..
 const macd = MACD(close, 12, 26, 9);
 
-//BOLLINGER_BANDS
+//BollingerBands
 //outputs an object with 4 array elements {upper <array>, lower <array>, mid <array>, loc <number>}
 //loc is a percentage numeric representation of the current price in bollinger bands.
-const bollingerBands = BOLLINGER_BANDS(close, 20, 2);
+const bollingerBands = BollingerBands(close, 20, 2);
 const {mid} = bollingerBands;
 
 

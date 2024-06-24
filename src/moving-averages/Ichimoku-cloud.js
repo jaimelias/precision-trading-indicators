@@ -1,91 +1,107 @@
+import { findLastCross } from "../signals/find-last-cross.js";
 
-import { findLastCross } from "../signals/find-last-cross.js" 
+export class IchimokuCloud {
+  constructor(BigNumber, ohlcv) {
+    this.BigNumber = BigNumber;
+    this.ohlcv = ohlcv;
 
-export const ICHIMOKU_CLOUD = (BigNumber, ohlcv) => {
+    // Ichimoku Cloud periods (constants)
+    this.TENKAN_SEN_PERIOD = 9;
+    this.KIJUN_SEN_PERIOD = 26;
+    this.SENKOU_SPAN_B_PERIOD = 52;
+    this.SENKOU_SPAN_A_PERIOD = Math.round((this.TENKAN_SEN_PERIOD + this.KIJUN_SEN_PERIOD) / 2); 
 
-    let {high, low, close} = ohlcv
-    const TENKAN_SEN_PERIOD = 9
-    const KIJUN_SEN_PERIOD = 26
-    const SENKOU_SPAN_B_PERIOD = 52
-    const SENKOU_SPAN_A_PERIOD = (TENKAN_SEN_PERIOD + KIJUN_SEN_PERIOD) / 2
+    this.updateLines(); 
+  }
 
-    let tenkanSen = calculateAverage(BigNumber, high, low, TENKAN_SEN_PERIOD)
-    let kijunSen = calculateAverage(BigNumber, high, low, KIJUN_SEN_PERIOD)
-    let senkouSpanA = calculateSenkouSpanA(BigNumber, tenkanSen, kijunSen, SENKOU_SPAN_A_PERIOD)
-    let senkouSpanB = calculateSenkouSpanB(BigNumber, high, low, SENKOU_SPAN_B_PERIOD)
-    let chikouSpan = calculateChikouSpan(close, KIJUN_SEN_PERIOD)
+  updateLines() {
+    // Destructure OHLCV data
+    const { high, low, close } = this.ohlcv;
 
-    const startIndex = KIJUN_SEN_PERIOD
-    tenkanSen = tenkanSen.slice(startIndex)
-    kijunSen = kijunSen.slice(startIndex)
-    senkouSpanA = senkouSpanA.slice(startIndex).filter(o => o && !isNaN(o))
-    chikouSpan = chikouSpan.slice(0, -KIJUN_SEN_PERIOD)
+    // Calculate Ichimoku lines
+    this.tenkanSen = this.calculateAverage(high, low, this.TENKAN_SEN_PERIOD);
+    this.kijunSen = this.calculateAverage(high, low, this.KIJUN_SEN_PERIOD);
 
-    const newClose = close.splice(-senkouSpanA.length)
-    const spanACross = findLastCross({fast: newClose, slow: senkouSpanA})
-    const spanBCross = findLastCross({fast: newClose, slow: senkouSpanB})
-    const baseCross = findLastCross({fast: tenkanSen, slow: kijunSen})
+    // Optimize Senkou Span A calculation (no need for separate loop)
+    this.senkouSpanA = this.tenkanSen.map((value, i) => value.plus(this.kijunSen[i]).dividedBy(2));  
 
+    this.senkouSpanB = this.calculateAverage(high, low, this.SENKOU_SPAN_B_PERIOD);
+    this.chikouSpan = close.slice(0, -this.KIJUN_SEN_PERIOD); // Slice to match other lines
+
+    // Shift lines to align properly
+    const startIndex = this.KIJUN_SEN_PERIOD;
+    this.tenkanSen = this.tenkanSen.slice(startIndex);
+    this.kijunSen = this.kijunSen.slice(startIndex);
+    this.senkouSpanA = this.senkouSpanA.slice(startIndex - this.KIJUN_SEN_PERIOD); // Adjust for Senkou Span A shift
+    this.senkouSpanB = this.senkouSpanB.slice(startIndex - this.KIJUN_SEN_PERIOD); // Adjust for Senkou Span B shift
+
+    // Find crosses (ensure consistent lengths)
+    const recentClose = close.slice(-this.tenkanSen.length); // Use recent close for crosses
+    this.spanACross = findLastCross({ fast: recentClose, slow: this.senkouSpanA });
+    this.spanBCross = findLastCross({ fast: recentClose, slow: this.senkouSpanB });
+    this.baseCross = findLastCross({ fast: this.tenkanSen, slow: this.kijunSen });
+  }
+
+
+  add(ohlcvDataPoint) {
+    this.ohlcv.high.push(ohlcvDataPoint.high);
+    this.ohlcv.low.push(ohlcvDataPoint.low);
+    this.ohlcv.close.push(ohlcvDataPoint.close);
+    this.updateLines();
+  }
+
+  update(ohlcvDataPoint) {
+    const lastIndex = this.ohlcv.high.length - 1;
+    this.ohlcv.high[lastIndex] = ohlcvDataPoint.high;
+    this.ohlcv.low[lastIndex] = ohlcvDataPoint.low;
+    this.ohlcv.close[lastIndex] = ohlcvDataPoint.close;
+    this.updateLines();
+  }
+
+  get() {
     return {
-        conversionLine: tenkanSen,
-        baseLine: kijunSen,
-        leadingSpanA: senkouSpanA,
-        leadingSpanB: senkouSpanB,
-        laggingSpan: chikouSpan,
-        crosses: {
-            spanACross,
-            spanBCross,
-            baseCross
-        }
-    }
-}
+      conversionLine: this.tenkanSen,
+      baseLine: this.kijunSen,
+      leadingSpanA: this.senkouSpanA,
+      leadingSpanB: this.senkouSpanB,
+      laggingSpan: this.chikouSpan,
+      crosses: {
+        spanACross: this.spanACross,
+        spanBCross: this.spanBCross,
+        baseCross: this.baseCross
+      }
+    };
+  }
 
-const calculateAverage =  (BigNumber, high, low, period) => {
-    let averages = []
+  calculateAverage(high, low, period) {
+    return high.slice(period - 1).map((_, i) => {
+      const highSlice = high.slice(i, i + period);
+      const lowSlice = low.slice(i, i + period);
+      return this.BigNumber.maximum(...highSlice).plus(this.BigNumber.minimum(...lowSlice)).dividedBy(2);
+    });
+  }
 
-    for (let i = period - 1; i < high.length; i++) {
-        let sum = new BigNumber(0)
-        for (let j = i; j > i - period; j--) {
-            const calc = (high[j].plus(low[j])).dividedBy(2)
-            sum = sum.plus(calc)
-        }
-        averages.push(sum.dividedBy(period))
-    }
-
-    return averages
-}
-
-const calculateSenkouSpanA = (BigNumber, tenkanSen, kijunSen, period) => {
-
-    let senkouSpanA = []
-
+  calculateSenkouSpanA(tenkanSen, kijunSen) {
+    const senkouSpanA = [];
     for (let i = 0; i < tenkanSen.length; i++) {
-        if (i >= period - 1) {
-            let sum = new BigNumber(0)
-            for (let j = i; j > i - period; j--) {
-                const calc = (tenkanSen[j].plus(kijunSen[j])).dividedBy(2)
-                sum = sum.plus(calc)
-            }
-            senkouSpanA.push(sum.dividedBy(period))
-        } else {
-            senkouSpanA.push(null)
-        }
+      senkouSpanA.push(tenkanSen[i].plus(kijunSen[i]).dividedBy(2));
     }
+    return senkouSpanA;
+  }
 
-    return senkouSpanA
-}
-
-const calculateSenkouSpanB = (BigNumber, high, low, period) => {
-
-    let senkouSpanB = []
-
+  calculateSenkouSpanB(high, low, period) {
+    const senkouSpanB = [];
     for (let i = period - 1; i < high.length; i++) {
-        let maxHigh = new BigNumber.maximum(...high.slice(i - period + 1, i + 1))
-        let minLow = new BigNumber.minimum(...low.slice(i - period + 1, i + 1))
-        senkouSpanB.push((maxHigh.plus(minLow)).dividedBy(2))
+      const highSlice = high.slice(i - period + 1, i + 1);
+      const lowSlice = low.slice(i - period + 1, i + 1);
+      const maxHigh = this.BigNumber.maximum(...highSlice);
+      const minLow = this.BigNumber.minimum(...lowSlice);
+      senkouSpanB.push(maxHigh.plus(minLow).dividedBy(2));
     }
+    return senkouSpanB;
+  }
 
-    return senkouSpanB
+  calculateChikouSpan(close, kijunSenPeriod) {
+    return close.slice(0, close.length - kijunSenPeriod);
+  }
 }
-
-const calculateChikouSpan = (close, kijunSenPeriod) =>  close.slice(kijunSenPeriod)
