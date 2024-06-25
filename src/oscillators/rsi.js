@@ -1,4 +1,3 @@
-
 import { EMA } from "../moving-averages/ema.js";
 import { findLastCross } from "../signals/find-last-cross.js";
 
@@ -14,7 +13,7 @@ export class RSI {
     this.one = BigNumber(1);
 
     this.rsi = [];
-    this.pl = data.slice(0, period);
+    this.pl = data.slice(0, period + 1);
 
     if (data.length >= period) {
       this.calculateInitialRSI();
@@ -25,30 +24,40 @@ export class RSI {
   }
 
   calculateInitialRSI() {
-    for (let i = this.period, gain = this.zero, loss = this.zero; i < this.data.length; i++, gain = this.zero, loss = this.zero) {
-      this.pl.push(this.data[i]);
+    let gain = this.zero;
+    let loss = this.zero;
 
-      for (let q = 1; q < this.pl.length; q++) {
-        const thisVal = this.BigNumber(this.pl[q]);
-        const prevVal = this.BigNumber(this.pl[q - 1]);
+    for (let i = 1; i < this.period; i++) {
+      const thisVal = this.BigNumber(this.data[i]);
+      const prevVal = this.BigNumber(this.data[i - 1]);
 
-        if (thisVal.minus(prevVal).isLessThan(this.zero)) {
-          loss = loss.plus(thisVal.minus(prevVal).abs());
-        } else {
-          gain = gain.plus(thisVal.minus(prevVal));
-        }
+      if (thisVal.minus(prevVal).isLessThan(this.zero)) {
+        loss = loss.plus(thisVal.minus(prevVal).abs());
+      } else {
+        gain = gain.plus(thisVal.minus(prevVal));
+      }
+    }
+
+    let avgGain = gain.dividedBy(this.period);
+    let avgLoss = loss.dividedBy(this.period);
+
+    for (let i = this.period; i < this.data.length; i++) {
+      const thisVal = this.BigNumber(this.data[i]);
+      const prevVal = this.BigNumber(this.data[i - 1]);
+
+      if (thisVal.minus(prevVal).isLessThan(this.zero)) {
+        loss = thisVal.minus(prevVal).abs();
+        gain = this.zero;
+      } else {
+        gain = thisVal.minus(prevVal);
+        loss = this.zero;
       }
 
-      const gainPeriod = gain.dividedBy(this.period);
-      const lossPeriod = loss.dividedBy(this.period);
+      avgGain = avgGain.times(this.period - 1).plus(gain).dividedBy(this.period);
+      avgLoss = avgLoss.times(this.period - 1).plus(loss).dividedBy(this.period);
 
-      const gainLoss = lossPeriod.isEqualTo(this.zero) ? this.zero : gainPeriod.dividedBy(lossPeriod);
-
-      this.rsi.push(
-        this.hundred.minus(this.hundred.dividedBy(this.one.plus(gainLoss)))
-      );
-
-      this.pl.splice(0, 1);
+      const rs = avgLoss.isEqualTo(this.zero) ? this.hundred : avgGain.dividedBy(avgLoss);
+      this.rsi.push(this.hundred.minus(this.hundred.dividedBy(this.one.plus(rs))));
     }
   }
 
@@ -62,8 +71,28 @@ export class RSI {
   add(dataPoint) {
     this.data.push(dataPoint);
 
-    const thisVal = this.BigNumber(dataPoint);
-    const prevVal = this.BigNumber(this.data[this.data.length - 2]);
+    this.calculateAndUpdateRSI(this.data.length - 1);
+
+    if (this.rsi.length > this.period) {
+      this.rsi.shift();
+    }
+
+    this.rsiEma.add(this.rsi[this.rsi.length - 1]);
+    this.updateCross();
+  }
+
+  update(dataPoint) {
+    if (this.data.length > 0) {
+      this.data[this.data.length - 1] = dataPoint;
+      this.calculateAndUpdateRSI(this.data.length - 1);
+      this.rsiEma.update(this.rsi[this.rsi.length - 1]);
+      this.updateCross();
+    }
+  }
+
+  calculateAndUpdateRSI(index) {
+    const thisVal = this.BigNumber(this.data[index]);
+    const prevVal = this.BigNumber(this.data[index - 1]);
 
     let gain = this.zero;
     let loss = this.zero;
@@ -79,44 +108,7 @@ export class RSI {
 
     const gainLoss = lossPeriod.isEqualTo(this.zero) ? this.zero : gainPeriod.dividedBy(lossPeriod);
 
-    this.rsi.push(
-      this.hundred.minus(this.hundred.dividedBy(this.one.plus(gainLoss)))
-    );
-
-    if (this.rsi.length > this.period) {
-      this.rsi.shift();
-    }
-
-    this.rsiEma.add(this.rsi[this.rsi.length - 1]);
-    this.updateCross();
-  }
-
-  update(dataPoint) {
-    if (this.data.length > 0) {
-      this.data[this.data.length - 1] = dataPoint;
-
-      const thisVal = this.BigNumber(dataPoint);
-      const prevVal = this.BigNumber(this.data[this.data.length - 2]);
-
-      let gain = this.zero;
-      let loss = this.zero;
-
-      if (thisVal.minus(prevVal).isLessThan(this.zero)) {
-        loss = loss.plus(thisVal.minus(prevVal).abs());
-      } else {
-        gain = gain.plus(thisVal.minus(prevVal));
-      }
-
-      const gainPeriod = gain.dividedBy(this.period);
-      const lossPeriod = loss.dividedBy(this.period);
-
-      const gainLoss = lossPeriod.isEqualTo(this.zero) ? this.zero : gainPeriod.dividedBy(lossPeriod);
-
-      this.rsi[this.rsi.length - 1] = this.hundred.minus(this.hundred.dividedBy(this.one.plus(gainLoss)));
-
-      this.rsiEma.update(this.rsi[this.rsi.length - 1]);
-      this.updateCross();
-    }
+    this.rsi[this.rsi.length - 1] = this.hundred.minus(this.hundred.dividedBy(this.one.plus(gainLoss)));
   }
 
   get() {
