@@ -9,9 +9,9 @@ export class IchimokuCloud {
     this.TENKAN_SEN_PERIOD = 9;
     this.KIJUN_SEN_PERIOD = 26;
     this.SENKOU_SPAN_B_PERIOD = 52;
-    this.SENKOU_SPAN_A_PERIOD = Math.round((this.TENKAN_SEN_PERIOD + this.KIJUN_SEN_PERIOD) / 2); 
+    this.SENKOU_SPAN_A_PERIOD = Math.round((this.TENKAN_SEN_PERIOD + this.KIJUN_SEN_PERIOD) / 2);
 
-    this.updateLines(); 
+    this.updateLines();
   }
 
   updateLines() {
@@ -23,7 +23,9 @@ export class IchimokuCloud {
     this.kijunSen = this.calculateAverage(high, low, this.KIJUN_SEN_PERIOD);
 
     // Optimize Senkou Span A calculation (no need for separate loop)
-    this.senkouSpanA = this.tenkanSen.map((value, i) => value.plus(this.kijunSen[i]).dividedBy(2));  
+    this.senkouSpanA = this.tenkanSen.map((value, i) => 
+      i < this.kijunSen.length ? value.plus(this.kijunSen[i]).dividedBy(2) : null
+    ).filter(val => val !== null);
 
     this.senkouSpanB = this.calculateAverage(high, low, this.SENKOU_SPAN_B_PERIOD);
     this.chikouSpan = close.slice(0, -this.KIJUN_SEN_PERIOD); // Slice to match other lines
@@ -41,7 +43,6 @@ export class IchimokuCloud {
     this.spanBCross = findLastCross({ fast: recentClose, slow: this.senkouSpanB });
     this.baseCross = findLastCross({ fast: this.tenkanSen, slow: this.kijunSen });
   }
-
 
   add(ohlcvDataPoint) {
     this.ohlcv.high.push(ohlcvDataPoint.high);

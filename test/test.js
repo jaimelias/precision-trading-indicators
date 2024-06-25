@@ -19,7 +19,7 @@ const {
 
 const period = 14;
 
-const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/LFUS/250')
+const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/LFUS/200')
 const json = await response.json()
 
 const ohlcv = {
@@ -73,10 +73,10 @@ const csv = conversionLine.map((v, i) => {
 	return {
 		conversionLine: conversionLine[i], 
 		baseLine: baseLine[i],
-		leadingSpanA: leadingSpanA[i], leadingSpanB:
-		leadingSpanB[i],
+		leadingSpanA: leadingSpanA[i], 
+		leadingSpanB: leadingSpanB[i],
 		laggingSpan: (typeof laggingSpan[i] === 'undefined') ? '' : laggingSpan[i]}
 
 })
 
-console.log(JSON.stringify(csv))
+console.log(csv.slice(-1))
