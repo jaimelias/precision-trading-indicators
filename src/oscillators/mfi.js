@@ -1,4 +1,3 @@
-
 export class MFI {
   constructor(BigNumber, ohlcv, period = 14) {
     this.BigNumber = BigNumber;
@@ -8,9 +7,9 @@ export class MFI {
     this.close = ohlcv.close;
     this.volume = ohlcv.volume;
 
-    this.zero = BigNumber(0);
-    this.hundred = BigNumber(100);
-    this.one = BigNumber(1);
+    this.zero = new BigNumber(0);
+    this.hundred = new BigNumber(100);
+    this.one = new BigNumber(1);
 
     this.typicalPrices = [];
     this.rawMoneyFlows = [];
@@ -29,15 +28,18 @@ export class MFI {
 
       this.typicalPrices.push(typicalPrice);
       this.rawMoneyFlows.push(rawMoneyFlow);
-    }
-
-    for (let i = 1; i < this.typicalPrices.length; i++) {
-      if (this.typicalPrices[i].isGreaterThan(this.typicalPrices[i - 1])) {
-        this.positiveMoneyFlows.push(this.rawMoneyFlows[i]);
-        this.negativeMoneyFlows.push(this.zero);
-      } else if (this.typicalPrices[i].isLessThan(this.typicalPrices[i - 1])) {
-        this.positiveMoneyFlows.push(this.zero);
-        this.negativeMoneyFlows.push(this.rawMoneyFlows[i]);
+      
+      if (i > 0) {
+        if (typicalPrice.isGreaterThan(this.typicalPrices[i - 1])) {
+          this.positiveMoneyFlows.push(rawMoneyFlow);
+          this.negativeMoneyFlows.push(this.zero);
+        } else if (typicalPrice.isLessThan(this.typicalPrices[i - 1])) {
+          this.positiveMoneyFlows.push(this.zero);
+          this.negativeMoneyFlows.push(rawMoneyFlow);
+        } else {
+          this.positiveMoneyFlows.push(this.zero);
+          this.negativeMoneyFlows.push(this.zero);
+        }
       } else {
         this.positiveMoneyFlows.push(this.zero);
         this.negativeMoneyFlows.push(this.zero);
@@ -45,20 +47,18 @@ export class MFI {
     }
 
     for (let i = this.period; i <= this.positiveMoneyFlows.length; i++) {
-      const positiveMoneyFlowSlice = this.positiveMoneyFlows.slice(i - this.period, i);
-      const negativeMoneyFlowSlice = this.negativeMoneyFlows.slice(i - this.period, i);
+      const positiveMoneyFlowSum = this.positiveMoneyFlows.slice(i - this.period, i).reduce((sum, value) => sum.plus(value), this.zero);
+      const negativeMoneyFlowSum = this.negativeMoneyFlows.slice(i - this.period, i).reduce((sum, value) => sum.plus(value), this.zero);
 
-      const positiveMoneyFlowSum = positiveMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
-      const negativeMoneyFlowSum = negativeMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
-
-      const moneyFlowRatio = positiveMoneyFlowSum.dividedBy(negativeMoneyFlowSum);
-      this.moneyFlowRatios.push(moneyFlowRatio);
+      if (negativeMoneyFlowSum.isEqualTo(this.zero)) {
+        this.moneyFlowRatios.push(this.hundred);  // or handle as needed
+      } else {
+        const moneyFlowRatio = positiveMoneyFlowSum.dividedBy(negativeMoneyFlowSum);
+        this.moneyFlowRatios.push(moneyFlowRatio);
+      }
     }
 
-    for (let i = 0; i < this.moneyFlowRatios.length; i++) {
-      const moneyFlowIndex = this.hundred.minus(this.hundred.dividedBy(this.one.plus(this.moneyFlowRatios[i])));
-      this.moneyFlowIndexes.push(moneyFlowIndex);
-    }
+    this.moneyFlowIndexes = this.moneyFlowRatios.map(mfr => this.hundred.minus(this.hundred.dividedBy(this.one.plus(mfr))));
   }
 
   add(ohlcv) {
@@ -73,76 +73,80 @@ export class MFI {
     this.typicalPrices.push(typicalPrice);
     this.rawMoneyFlows.push(rawMoneyFlow);
 
-    if (this.typicalPrices.length > 1) {
-      const previousTypicalPrice = this.typicalPrices[this.typicalPrices.length - 2];
-
-      if (typicalPrice.isGreaterThan(previousTypicalPrice)) {
+    const lastIndex = this.typicalPrices.length - 1;
+    if (lastIndex > 0) {
+      if (typicalPrice.isGreaterThan(this.typicalPrices[lastIndex - 1])) {
         this.positiveMoneyFlows.push(rawMoneyFlow);
         this.negativeMoneyFlows.push(this.zero);
-      } else if (typicalPrice.isLessThan(previousTypicalPrice)) {
+      } else if (typicalPrice.isLessThan(this.typicalPrices[lastIndex - 1])) {
         this.positiveMoneyFlows.push(this.zero);
         this.negativeMoneyFlows.push(rawMoneyFlow);
       } else {
         this.positiveMoneyFlows.push(this.zero);
         this.negativeMoneyFlows.push(this.zero);
       }
+    }
 
-      if (this.positiveMoneyFlows.length > this.period) {
-        const positiveMoneyFlowSlice = this.positiveMoneyFlows.slice(-this.period);
-        const negativeMoneyFlowSlice = this.negativeMoneyFlows.slice(-this.period);
+    if (this.positiveMoneyFlows.length > this.period) {
+      const positiveMoneyFlowSum = this.positiveMoneyFlows.slice(-this.period).reduce((sum, value) => sum.plus(value), this.zero);
+      const negativeMoneyFlowSum = this.negativeMoneyFlows.slice(-this.period).reduce((sum, value) => sum.plus(value), this.zero);
 
-        const positiveMoneyFlowSum = positiveMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
-        const negativeMoneyFlowSum = negativeMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
-
+      let moneyFlowIndex;
+      if (negativeMoneyFlowSum.isEqualTo(this.zero)) {
+        moneyFlowIndex = this.hundred;  // or handle as needed
+      } else {
         const moneyFlowRatio = positiveMoneyFlowSum.dividedBy(negativeMoneyFlowSum);
-        const moneyFlowIndex = this.hundred.minus(this.hundred.dividedBy(this.one.plus(moneyFlowRatio)));
+        moneyFlowIndex = this.hundred.minus(this.hundred.dividedBy(this.one.plus(moneyFlowRatio)));
+      }
 
-        this.moneyFlowIndexes.push(moneyFlowIndex);
+      this.moneyFlowIndexes.push(moneyFlowIndex);
 
-        if (this.moneyFlowIndexes.length > this.period) {
-          this.moneyFlowIndexes.shift();
-        }
+      if (this.moneyFlowIndexes.length > this.period) {
+        this.moneyFlowIndexes.shift();
       }
     }
   }
 
   update(ohlcv) {
     if (this.high.length > 0 && this.low.length > 0 && this.close.length > 0 && this.volume.length > 0) {
-      this.high[this.high.length - 1] = ohlcv.high;
-      this.low[this.low.length - 1] = ohlcv.low;
-      this.close[this.close.length - 1] = ohlcv.close;
-      this.volume[this.volume.length - 1] = ohlcv.volume;
+      const lastIndex = this.high.length - 1;
+      this.high[lastIndex] = ohlcv.high;
+      this.low[lastIndex] = ohlcv.low;
+      this.close[lastIndex] = ohlcv.close;
+      this.volume[lastIndex] = ohlcv.volume;
 
       const typicalPrice = ohlcv.high.plus(ohlcv.low).plus(ohlcv.close).dividedBy(3);
       const rawMoneyFlow = typicalPrice.times(ohlcv.volume);
 
-      this.typicalPrices[this.typicalPrices.length - 1] = typicalPrice;
-      this.rawMoneyFlows[this.rawMoneyFlows.length - 1] = rawMoneyFlow;
+      this.typicalPrices[lastIndex] = typicalPrice;
+      this.rawMoneyFlows[lastIndex] = rawMoneyFlow;
 
-      const previousTypicalPrice = this.typicalPrices[this.typicalPrices.length - 2];
-
+      const previousTypicalPrice = this.typicalPrices[lastIndex - 1];
+      
       if (typicalPrice.isGreaterThan(previousTypicalPrice)) {
-        this.positiveMoneyFlows[this.positiveMoneyFlows.length - 1] = rawMoneyFlow;
-        this.negativeMoneyFlows[this.negativeMoneyFlows.length - 1] = this.zero;
+        this.positiveMoneyFlows[lastIndex] = rawMoneyFlow;
+        this.negativeMoneyFlows[lastIndex] = this.zero;
       } else if (typicalPrice.isLessThan(previousTypicalPrice)) {
-        this.positiveMoneyFlows[this.positiveMoneyFlows.length - 1] = this.zero;
-        this.negativeMoneyFlows[this.negativeMoneyFlows.length - 1] = rawMoneyFlow;
+        this.positiveMoneyFlows[lastIndex] = this.zero;
+        this.negativeMoneyFlows[lastIndex] = rawMoneyFlow;
       } else {
-        this.positiveMoneyFlows[this.positiveMoneyFlows.length - 1] = this.zero;
-        this.negativeMoneyFlows[this.negativeMoneyFlows.length - 1] = this.zero;
+        this.positiveMoneyFlows[lastIndex] = this.zero;
+        this.negativeMoneyFlows[lastIndex] = this.zero;
       }
 
       if (this.positiveMoneyFlows.length >= this.period) {
-        const positiveMoneyFlowSlice = this.positiveMoneyFlows.slice(-this.period);
-        const negativeMoneyFlowSlice = this.negativeMoneyFlows.slice(-this.period);
+        const positiveMoneyFlowSum = this.positiveMoneyFlows.slice(-this.period).reduce((sum, value) => sum.plus(value), this.zero);
+        const negativeMoneyFlowSum = this.negativeMoneyFlows.slice(-this.period).reduce((sum, value) => sum.plus(value), this.zero);
 
-        const positiveMoneyFlowSum = positiveMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
-        const negativeMoneyFlowSum = negativeMoneyFlowSlice.reduce((sum, value) => sum.plus(value), this.zero);
+        let moneyFlowIndex;
+        if (negativeMoneyFlowSum.isEqualTo(this.zero)) {
+          moneyFlowIndex = this.hundred;  // or handle as needed
+        } else {
+          const moneyFlowRatio = positiveMoneyFlowSum.dividedBy(negativeMoneyFlowSum);
+          moneyFlowIndex = this.hundred.minus(this.hundred.dividedBy(this.one.plus(moneyFlowRatio)));
+        }
 
-        const moneyFlowRatio = positiveMoneyFlowSum.dividedBy(negativeMoneyFlowSum);
-        const moneyFlowIndex = this.hundred.minus(this.hundred.dividedBy(this.one.plus(moneyFlowRatio)));
-
-        this.moneyFlowIndexes[this.moneyFlowIndexes.length - 1] = moneyFlowIndex;
+        this.moneyFlowIndexes[lastIndex] = moneyFlowIndex;
       }
     }
   }

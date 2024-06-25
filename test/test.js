@@ -19,7 +19,7 @@ const {
 
 const period = 14;
 
-const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/AAPL/200')
+const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/NVDA/200')
 const json = await response.json()
 
 const ohlcv = {
@@ -76,4 +76,4 @@ const csv = conversionLine.map((v, i) => ({
 	laggingSpan: laggingSpan[i]
 }))
 
-console.log(rsi.rsi[rsi.rsi.length -1].toNumber())
+console.log(adx.adx[adx.adx.length -1])
