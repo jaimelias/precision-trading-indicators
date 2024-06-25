@@ -19,7 +19,7 @@ const {
 
 const period = 14;
 
-const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/AAPL/365')
+const response = await fetch('https://api.gpu.trading/v1/vpn/candlesticks/LFUS/250')
 const json = await response.json()
 
 const ohlcv = {
