@@ -76,4 +76,4 @@ const csv = conversionLine.map((v, i) => ({
 	laggingSpan: laggingSpan[i]
 }))
 
-console.log(adx.adx[adx.adx.length -1])
+console.log(csv)
